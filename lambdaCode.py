@@ -5,6 +5,35 @@ from pymongo import MongoClient
 import os
 from config import Config
 
+class CurrencyData():
+    def __init__(self, currency):
+        self.currency = currency
+        self.date = datetime.datetime.now()
+        self.market_cap = None
+
+        # Volume in 24 hours
+        self.volume = None
+
+        # Circulating supply
+        self.supply = None
+        self.all_time_high = None
+        self.all_time_low = None
+        self.high = None
+        self.low = None
+
+        # Price now X?
+        self.price = None
+        self.percent_return = None
+        self.dollar_return = None
+
+    def call_coinbase(self):
+        try:
+            response = requests.get("https://api.coinbase.com/v2/prices/{}-USD/buy".format(self.currency))
+            response.raise_for_status()
+            self.price = float(response.json()["data"]["amount"])
+        except Exception as e:
+            print(e)
+
 def on_trigger(event, context):
     #connectionString = os.environ["MONGO_URL"]
 
@@ -21,19 +50,14 @@ def on_trigger(event, context):
     # Iterating the index 
     # same as 'for i in range(len(currencies))' 
     for currency in currencies:
-        mycol = db[currency]
-        #time.sleep(10)
-        
-        #Price of crypto
-        # timestamp is 12/02/2019 @ 2:30pm (UTC)
-        timestamp = datetime.datetime.fromtimestamp(1575297000).isoformat()
-        price = str(float(requests.get("https://api.coinbase.com/v2/prices/{}-USD/buy".format(currency))
-            .json()["data"]["amount"]))
+        currency_data = CurrencyData()
+
+        currency_data.call_coinbase()
         
         # Does not work - need account or API key?
-        payload = {"apikey": Config.API_KEYS["CRYPTOWATCH"]}
+        headers = {"X-CW-API-Key": Config.API_KEYS["CRYPTOWATCH"]}
         url = "https://api.cryptowat.ch/markets/kraken/{}usd/summary".format(currency)
-        response = requests.request("GET", url, params=payload)
+        response = requests.request("GET", url, headers=headers)
         
         #Absolute change in crypto
         change = str(response.json()["result"]["price"]["change"]["absolute"])
@@ -48,8 +72,12 @@ def on_trigger(event, context):
         #Low for crypto
         low = str(response.json()["result"]["price"]["low"])
 
+        # timestamp is 12/02/2019 @ 2:30pm (UTC) - why are we using this date?
+        timestamp = datetime.datetime.fromtimestamp(1575297000).isoformat()
+
         # Why are values inserted as strings into the database?
         myDict = { "Timestamp": timestamp, "price": price, "Absolute change": change, "High": high, "low": low }
+        mycol = db[currency]
         x = mycol.insert_one(myDict)
         
         # Note that this API only allows 5 calls per minute and 500 calls per day on free plan
