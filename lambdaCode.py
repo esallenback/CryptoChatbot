@@ -3,6 +3,7 @@ import requests
 import time    
 from pymongo import MongoClient
 import os
+from config import Config
 
 def on_trigger(event, context):
     #connectionString = os.environ["MONGO_URL"]
@@ -13,7 +14,6 @@ def on_trigger(event, context):
             'BAT', 'XRP',
             'LINK', 'DASH',
             'XTZ', 'ZEC', 'REP']
-    num_currencies = len(currencies)
 
     client = MongoClient("mongodb+srv://emilys:UIUCchatbot@cluster0-ar3em.mongodb.net/test?retryWrites=true&w=majority")
     db = client["cryptocurrencyChatbot"]
@@ -30,8 +30,10 @@ def on_trigger(event, context):
         price = str(float(requests.get("https://api.coinbase.com/v2/prices/{}-USD/buy".format(currency))
             .json()["data"]["amount"]))
         
-        url = "https://api.cryptowat.ch/markets/kraken/usd/summary".format(currency)
-        response = requests.request("GET", url)
+        # Does not work - need account or API key?
+        payload = {"apikey": Config.API_KEYS["CRYPTOWATCH"]}
+        url = "https://api.cryptowat.ch/markets/kraken/{}usd/summary".format(currency)
+        response = requests.request("GET", url, params=payload)
         
         #Absolute change in crypto
         change = str(response.json()["result"]["price"]["change"]["absolute"])
@@ -46,40 +48,41 @@ def on_trigger(event, context):
         #Low for crypto
         low = str(response.json()["result"]["price"]["low"])
 
+        # Why are values inserted as strings into the database?
         myDict = { "Timestamp": timestamp, "price": price, "Absolute change": change, "High": high, "low": low }
         x = mycol.insert_one(myDict)
         
-        #MONGODB
-        if(False):
-            payload = {"function": "DIGITAL_CURRENCY_DAILY", "symbol": currency, "market": "USD", "apikey": "729WZLMQLLZMCYJF"}
-            # url = "https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol=" + currency + "&market=USD&apikey=729WZLMQLLZMCYJF"  
-            response = requests.request("GET", url, params=payload)
+        # Note that this API only allows 5 calls per minute and 500 calls per day on free plan
+        # Perhaps update to premium account at https://www.alphavantage.co/premium/
+        payload = {"function": "DIGITAL_CURRENCY_DAILY", "symbol": currency, "market": "USD", "apikey": Config.API_KEYS["ALPHAVANTAGE"]}
+        url = "https://www.alphavantage.co/query"
+        response = requests.request("GET", url, params=payload)
+        
+        try:
+
+            if (response.status_code == 200):
             
-            try:
+                #The timestamp is for yesterday (Some of the cryptos are not yet updated - easier to pull data for day before)
+                timeStamp = datetime.datetime.strftime(datetime.datetime.now() - datetime.timedelta(1), '%Y-%m-%d')
 
-                if (response.status_code == 200):
+                data = response.json()["Time Series (Digital Currency Daily)"][f"{datetime.datetime.strftime(datetime.datetime.now() - datetime.timedelta(1), '%Y-%m-%d')}"]
                 
-                    #The timestamp is for yesterday (Some of the cryptos are not yet updated - easier to pull data for day before)
-                    timeStamp = datetime.datetime.strftime(datetime.datetime.now() - datetime.timedelta(1), '%Y-%m-%d')
-                    
-                    #Open for crypto
-                    print(str(response.json()["Time Series (Digital Currency Daily)"][f"{datetime.datetime.strftime(datetime.datetime.now() - datetime.timedelta(1), '%Y-%m-%d')}"]["1a. open (USD)"]))
+                #Open for crypto
+                print(str(data["1a. open (USD)"]))
 
-                    #Close for crypto
-                    print(str(response.json()["Time Series (Digital Currency Daily)"][f"{datetime.datetime.strftime(datetime.datetime.now() - datetime.timedelta(1), '%Y-%m-%d')}"]["4a. close (USD)"]))
+                #Close for crypto
+                print(str(data["4a. close (USD)"]))
 
-                    #Volume for crypto
-                    print(str(response.json()["Time Series (Digital Currency Daily)"][f"{datetime.datetime.strftime(datetime.datetime.now() - datetime.timedelta(1), '%Y-%m-%d')}"]["5. volume"]))
+                #Volume for crypto
+                print(str(data["5. volume"]))
 
-                    #Market Cap for crypto
-                    print(str(response.json()["Time Series (Digital Currency Daily)"][f"{datetime.datetime.strftime(datetime.datetime.now() - datetime.timedelta(1), '%Y-%m-%d')}"]["6. market cap (USD)"]))
-
-                    
-            except:
+                #Market Cap for crypto
+                print(str(data["6. market cap (USD)"]))
                 
-                print("Cannot retrieve the data at this time")
-                
-            print("___________________________________")
+        except:
+            print("Status Code {}: {}".format(response.status_code, response.text))
+            
+        print("___________________________________")
 
 if __name__ == "__main__":
     on_trigger(None, None)
