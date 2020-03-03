@@ -16,10 +16,13 @@ class CurrencyData():
 
         # Circulating supply
         self.supply = None
+
         self.all_time_high = None
         self.all_time_low = None
         self.high = None
         self.low = None
+        self.open = None
+        self.close = None
 
         # Price now X?
         self.price = None
@@ -31,6 +34,37 @@ class CurrencyData():
             response = requests.get("https://api.coinbase.com/v2/prices/{}-USD/buy".format(self.currency))
             response.raise_for_status()
             self.price = float(response.json()["data"]["amount"])
+        except Exception as e:
+            print(e)
+
+    def call_alphavantage(self):
+        try:
+            # Note that this API only allows 5 calls per minute and 500 calls per day on free plan
+            # Perhaps update to premium account at https://www.alphavantage.co/premium/
+            payload = {"function": "DIGITAL_CURRENCY_DAILY", "symbol": self.currency, "market": "USD", "apikey": Config.API_KEYS["ALPHAVANTAGE"]}
+            url = "https://www.alphavantage.co/query"
+            response = requests.request("GET", url, params=payload)
+            response.raise_for_status()
+
+            data = response.json()
+            if "Note" in data:
+                print(data["Note"])
+                return
+
+            #The timestamp is for yesterday (Some of the cryptos are not yet updated - easier to pull data for day before)
+            timeStamp = datetime.datetime.strftime(datetime.datetime.now() - datetime.timedelta(1), '%Y-%m-%d')
+            data = data["Time Series (Digital Currency Daily)"][f"{datetime.datetime.strftime(datetime.datetime.now() - datetime.timedelta(1), '%Y-%m-%d')}"]
+
+            self.open = float(data["1a. open (USD)"])
+            self.close = float(data["4a. close (USD)"])
+            self.volume = float(data["5. volume"])
+            self.market_cap = float(data["6. market cap (USD)"])
+
+            print(self.open)
+            print(self.close)
+            print(self.volume)
+            print(self.market_cap)
+        
         except Exception as e:
             print(e)
 
@@ -50,9 +84,10 @@ def on_trigger(event, context):
     # Iterating the index 
     # same as 'for i in range(len(currencies))' 
     for currency in currencies:
-        currency_data = CurrencyData()
+        currency_data = CurrencyData(currency)
 
         currency_data.call_coinbase()
+        currency_data.call_alphavantage()
         
         # Does not work - need account or API key?
         headers = {"X-CW-API-Key": Config.API_KEYS["CRYPTOWATCH"]}
@@ -76,41 +111,9 @@ def on_trigger(event, context):
         timestamp = datetime.datetime.fromtimestamp(1575297000).isoformat()
 
         # Why are values inserted as strings into the database?
-        myDict = { "Timestamp": timestamp, "price": price, "Absolute change": change, "High": high, "low": low }
+        myDict = { "Timestamp": timestamp, "price": currency_data.price, "Absolute change": change, "High": high, "low": low }
         mycol = db[currency]
         x = mycol.insert_one(myDict)
-        
-        # Note that this API only allows 5 calls per minute and 500 calls per day on free plan
-        # Perhaps update to premium account at https://www.alphavantage.co/premium/
-        payload = {"function": "DIGITAL_CURRENCY_DAILY", "symbol": currency, "market": "USD", "apikey": Config.API_KEYS["ALPHAVANTAGE"]}
-        url = "https://www.alphavantage.co/query"
-        response = requests.request("GET", url, params=payload)
-        
-        try:
-
-            if (response.status_code == 200):
-            
-                #The timestamp is for yesterday (Some of the cryptos are not yet updated - easier to pull data for day before)
-                timeStamp = datetime.datetime.strftime(datetime.datetime.now() - datetime.timedelta(1), '%Y-%m-%d')
-
-                data = response.json()["Time Series (Digital Currency Daily)"][f"{datetime.datetime.strftime(datetime.datetime.now() - datetime.timedelta(1), '%Y-%m-%d')}"]
-                
-                #Open for crypto
-                print(str(data["1a. open (USD)"]))
-
-                #Close for crypto
-                print(str(data["4a. close (USD)"]))
-
-                #Volume for crypto
-                print(str(data["5. volume"]))
-
-                #Market Cap for crypto
-                print(str(data["6. market cap (USD)"]))
-                
-        except:
-            print("Status Code {}: {}".format(response.status_code, response.text))
-            
-        print("___________________________________")
 
 if __name__ == "__main__":
     on_trigger(None, None)
