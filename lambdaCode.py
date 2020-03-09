@@ -8,26 +8,26 @@ from config import Config
 class CurrencyData():
     def __init__(self, currency):
         self.currency = currency
-        self.date = datetime.datetime.now()
-        self.market_cap = None
+        self.timestamp = datetime.datetime.now()
+        self.market_cap = None      # alphavantage
 
         # Volume in 24 hours
-        self.volume = None
+        self.volume = None          # alphavantage, kraken
 
         # Circulating supply
         self.supply = None
 
         self.all_time_high = None
         self.all_time_low = None
-        self.high = None
-        self.low = None
-        self.open = None
-        self.close = None
+        self.high = None            # kraken
+        self.low = None             # kraken
+        self.open = None            # alphavantage
+        self.close = None           # alphavantage
 
         # Price now X?
-        self.price = None
-        self.percent_return = None
-        self.dollar_return = None
+        self.price = None           # coinbase
+        self.percent_return = None  # kraken?
+        self.dollar_return = None   # kraken?
 
     def call_coinbase(self):
         try:
@@ -59,12 +59,26 @@ class CurrencyData():
             self.close = float(data["4a. close (USD)"])
             self.volume = float(data["5. volume"])
             self.market_cap = float(data["6. market cap (USD)"])
-
-            print(self.open)
-            print(self.close)
-            print(self.volume)
-            print(self.market_cap)
         
+        except Exception as e:
+            print(e)
+            
+    def call_kraken(self):
+        try:
+            headers = {"X-CW-API-Key": Config.API_KEYS["CRYPTOWATCH"]}
+            url = "https://api.cryptowat.ch/markets/kraken/{}usd/summary".format(currency)
+            response = requests.request("GET", url, headers=headers)
+            response.raise_for_status()
+
+            #Absolute change in crypto
+            self.dollar_return = float(response.json()["result"]["price"]["change"]["absolute"])
+
+            #Percent change in crypto
+            self.percent_return = float(response.json()["result"]["price"]["change"]["percent"])
+            
+            self.high = str(response.json()["result"]["price"]["high"])
+            self.low = str(response.json()["result"]["price"]["low"])
+
         except Exception as e:
             print(e)
 
@@ -88,30 +102,19 @@ def on_trigger(event, context):
 
         currency_data.call_coinbase()
         currency_data.call_alphavantage()
+        # currency_data.call_kraken()
         
-        # Does not work - need account or API key?
-        headers = {"X-CW-API-Key": Config.API_KEYS["CRYPTOWATCH"]}
-        url = "https://api.cryptowat.ch/markets/kraken/{}usd/summary".format(currency)
-        response = requests.request("GET", url, headers=headers)
-        
-        #Absolute change in crypto
-        change = str(response.json()["result"]["price"]["change"]["absolute"])
-
-        #Percent change in crypto
-        #print("Percent change for " + currencies[i] + "(24hrs): " +
-        #          str(response.json()["result"]["price"]["change"]["percent"]))
-        
-        #High for crypto
-        high = str(response.json()["result"]["price"]["high"])
-        
-        #Low for crypto
-        low = str(response.json()["result"]["price"]["low"])
-
         # timestamp is 12/02/2019 @ 2:30pm (UTC) - why are we using this date?
         timestamp = datetime.datetime.fromtimestamp(1575297000).isoformat()
 
         # Why are values inserted as strings into the database?
-        myDict = { "Timestamp": timestamp, "price": currency_data.price, "Absolute change": change, "High": high, "low": low }
+        myDict = {
+            "Timestamp": currency_data.timestamp, 
+            "price": currency_data.price, 
+            "Absolute change": currency_data.change, 
+            "High": currency_data.high, 
+            "low": currency_data.low
+        }
         mycol = db[currency]
         x = mycol.insert_one(myDict)
 
