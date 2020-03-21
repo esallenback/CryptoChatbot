@@ -8,37 +8,31 @@ from config import Config
 class CurrencyData():
     def __init__(self, currency):
         self.currency = currency
-        self.timestamp = datetime.datetime.now(datetime.timezone.utc)
-        self.market_cap = None      # nomics, alphavantage
+
+        # Get yesterday's data
+        self.timestamp = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=1)
+        self.timestamp = self.timestamp.replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        self.market_cap = None      # nomics
 
         # Volume in 24 hours
-        self.volume = None          # nomics, kraken, alphavantage
+        self.volume = None
 
         # Circulating supply
         self.supply = None          # nomics
 
         self.all_time_high = None   # nomics
 
-        # self.all_time_low = None  # all time low doesn't really make sense
-
-        self.high = None            # kraken
-        self.low = None             # kraken
-        self.open = None            # alphavantage
-        self.close = None           # alphavantage
+        self.high = None
+        self.low = None
+        self.open = None
+        self.close = None
 
         # Price now X?
-        self.price = None           # nomics, coinbase
+        # Price at what time?
+        # self.price = None
         self.percent_return = None  # kraken
         self.dollar_return = None   # kraken
-
-    def call_coinbase(self):
-        try:
-            response = requests.get("https://api.coinbase.com/v2/prices/{}-USD/buy".format(self.currency))
-            response.raise_for_status()
-            self.price = float(response.json()["data"]["amount"])
-        except Exception as e:
-            print("Coinbase error")
-            print(e)
 
     def call_alphavantage(self):
         try:
@@ -91,19 +85,59 @@ class CurrencyData():
         try:
             parameters = {"key": Config.API_KEYS["NOMICS"], "ids": self.currency, "interval": "1d"}
             url = "https://api.nomics.com/v1/currencies/ticker"
-            response = requests.request("GET", url, parameters=parameters)
+            response = requests.request("GET", url, params=parameters)
             response.raise_for_status()
 
             # list of one currency
             json_result = response.json()[0]
 
-            self.price = json_result["price"]
+            # self.price = json_result["price"]
             self.market_cap = json_result["market_cap"]
             self.supply = json_result["circulating_supply"]
             self.all_time_high = json_result["high"]
 
         except Exception as e:
             print("Nomics error")
+            print(e)
+
+    def call_coinapi(self):
+        try:
+            url = "https://rest.coinapi.io/v1/ohlcv/{}/USD/history".format(self.currency)
+            parameters = {"period_id": "1DAY", "time_start": self.timestamp.isoformat(), "limit": 1}
+            headers = {'X-CoinAPI-Key' : Config.API_KEYS["COINAPI"]}
+            response = requests.request("GET", url, params=parameters, headers=headers)
+            response.raise_for_status()
+
+            print(response.text)
+
+        except Exception as e:
+            print("Coinapi error")
+            print(e)
+
+    def call_cryptocompare(self):
+        # Be sure to run at the correct time UTC
+        try:
+            headers = {"Apikey": Config.API_KEYS["CRYPTOCOMPARE"]}
+
+            url = "https://min-api.cryptocompare.com/data/v2/histoday"
+            parameters = {"fsym": self.currency, "tsym": "USD", "limit": 1}
+            response = requests.request("GET", url, params=parameters, headers=headers)
+
+            data = response.json()["Data"]["Data"][0]
+
+            self.open = float(data["open"])
+            self.close = float(data["close"])
+            self.high = float(data["high"])
+            self.low = float(data["low"])
+
+            url = "https://min-api.cryptocompare.com/data/symbol/histoday"
+            parameters = {"fsym": self.currency, "tsym": "USD", "limit": 1}
+            response = requests.request("GET", url, params=parameters, headers=headers)
+
+            self.volume = float(response.json()["Data"][0]["total_volume_total"])
+
+        except Exception as e:
+            print("Cryptocompare error")
             print(e)
 
 def on_trigger(event, context):
@@ -126,8 +160,11 @@ def on_trigger(event, context):
         currency_data = CurrencyData(currency)
 
         # currency_data.call_coinbase()
-        currency_data.call_alphavantage()
-        currency_data.call_kraken()
+        # currency_data.call_alphavantage()
+        # currency_data.call_kraken()
+
+        currency_data.call_nomics()
+        currency_data.call_cryptocompare()
 
         data_dict[currency] = currency_data
         
@@ -137,7 +174,7 @@ def on_trigger(event, context):
 
         myDict = {
             "timestamp": currency_data.timestamp, 
-            "price": currency_data.price, 
+            # "price": currency_data.price, 
             "absolute change": currency_data.dollar_return, 
             "percent change": currency_data.percent_return,
             "high": currency_data.high, 
