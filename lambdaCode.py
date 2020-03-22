@@ -92,9 +92,9 @@ class CurrencyData():
             json_result = response.json()[0]
 
             # self.price = json_result["price"]
-            self.market_cap = json_result["market_cap"]
-            self.supply = json_result["circulating_supply"]
-            self.all_time_high = json_result["high"]
+            self.market_cap = float(json_result["market_cap"])
+            self.supply = float(json_result["circulating_supply"])
+            self.all_time_high = float(json_result["high"])
 
         except Exception as e:
             print("Nomics error")
@@ -130,6 +130,9 @@ class CurrencyData():
             self.high = float(data["high"])
             self.low = float(data["low"])
 
+            self.dollar_return = self.close - self.open
+            self.percent_return = self.dollar_return / self.open * 100
+
             url = "https://min-api.cryptocompare.com/data/symbol/histoday"
             parameters = {"fsym": self.currency, "tsym": "USD", "limit": 1}
             response = requests.request("GET", url, params=parameters, headers=headers)
@@ -159,22 +162,14 @@ def on_trigger(event, context):
     for currency in currencies:
         currency_data = CurrencyData(currency)
 
-        # currency_data.call_coinbase()
-        # currency_data.call_alphavantage()
-        # currency_data.call_kraken()
-
         currency_data.call_nomics()
         currency_data.call_cryptocompare()
 
         data_dict[currency] = currency_data
         
     for currency, currency_data in data_dict.items():
-        # Use current time
-        timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
-
         myDict = {
             "timestamp": currency_data.timestamp, 
-            # "price": currency_data.price, 
             "absolute change": currency_data.dollar_return, 
             "percent change": currency_data.percent_return,
             "high": currency_data.high, 
