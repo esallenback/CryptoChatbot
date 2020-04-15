@@ -1,0 +1,18 @@
+{"intents": [
+        {"tag": "bitcoin",
+            "patterns": ["What is the price of bitcoin?", "price of bitcoin", "bitcoin value"],
+            "responses": ["Fetching bitcoin info"],
+            "context": [""]
+        },
+        {"tag": "ethereum",
+            "patterns": ["What is the price of ethereum?", "price of ethereum", "ethereum value"],
+            "responses": ["Fetching ethereum info"],
+            "context": [""]
+        },
+        {"tag": "ripple",
+            "patterns": ["What is the price of ripple?", "price of ripple", "ripple value"],
+            "responses": ["Fetching ripple info"],
+            "context": [""]
+        }
+    ]
+}
