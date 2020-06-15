@@ -3,6 +3,7 @@ import tensorflow as tf
 import keras
 import model
 import sys
+import random
 
 def main():
     print("Loading model...")
@@ -24,6 +25,15 @@ def main():
         print(x)
         results = trained_model.predict([[x]])
         print(results)
+
+        results_index = np.argmax(results)
+        tag = model.labels[results_index]
+
+        for tg in model.json_data["intents"]:
+            if tg['tag'] == tag:
+                responses = tg['responses']
+                break
+        print(random.choice(responses))
 
 if __name__ == "__main__":
     main()
