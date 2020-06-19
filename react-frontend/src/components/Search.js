@@ -13,16 +13,18 @@ class Search extends Component {
     }
 
     handleSearchChange = (event) => {
-        let search = event.target.value;
-        let result = "The user searched for " + search;
         this.setState({
-            usersearch: search,
-            history: this.state.history.concat([search, result]),
+            usersearch: event.target.value,
         })
     }
 
     handleSubmit = (event) => {
-        alert(`The user has searched for: ${this.state.usersearch}`)
+        let search = this.state.usersearch;
+        let result = "The user searched for " + search;
+        this.setState({
+            history: this.state.history.concat([search, result]),
+            usersearch: ''
+        });
         event.preventDefault()
     }
 
@@ -53,7 +55,7 @@ class Search extends Component {
     render() {
         return (
             <form onSubmit = {this.handleSubmit}>
-                <div >
+                <div>
                     <input style={{ width: '60%', marginTop: 25}}
                         type = 'text' 
                         placeholder = "Search for your favorite crypto..."
@@ -62,8 +64,8 @@ class Search extends Component {
                     />
                     <button type="reset" onClick = {this.clearSearch}>x</button>
                 </div>
-                {this.renderHistory()}
                 <Button style={{marginTop: 10}} type="submit" size="lg"> Search </Button>
+                {this.renderHistory()}
             </form>
         )
     }
