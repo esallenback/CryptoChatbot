@@ -7,13 +7,17 @@ class Search extends Component {
         super(props)
     
         this.state = {
-             usersearch:''
+             usersearch: '',
+             history: []
         }
     }
 
     handleSearchChange = (event) => {
+        let search = event.target.value;
+        let result = "The user searched for " + search;
         this.setState({
-            usersearch: event.target.value
+            usersearch: search,
+            history: this.state.history.concat([search, result]),
         })
     }
 
@@ -26,6 +30,24 @@ class Search extends Component {
         this.setState({
             usersearch: ""
         })
+    }
+
+    renderHistory() {
+        let historyElements = [];
+        for (const [index, value] of this.state.history.entries()) {
+            let itemClass = index % 2 == 0 ? 'search-entry' : 'result-entry';
+            historyElements.push(
+                <p key={index} class={itemClass}>
+                    { value }
+                </p>
+            );
+        }
+
+        return (
+            <div class="history">
+                {historyElements}
+            </div>
+        )
     }
     
     render() {
@@ -40,6 +62,7 @@ class Search extends Component {
                     />
                     <button type="reset" onClick = {this.clearSearch}>x</button>
                 </div>
+                {this.renderHistory()}
                 <Button style={{marginTop: 10}} type="submit" size="lg"> Search </Button>
             </form>
         )
