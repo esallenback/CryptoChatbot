@@ -1,0 +1,29 @@
+.container {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+}
+
+.history {
+    display: flex;
+    flex-direction: column-reverse;
+    width: 60%;
+}
+
+.search-entry {
+    align-self: flex-end;
+}
+
+.result-entry {
+    align-self: flex-start;
+}
+
+#search-form {
+    width: 100%;
+}
+
+#search-input {
+    width: 60%;
+    margin-top: 25px;
+}

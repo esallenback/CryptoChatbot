@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import Button from 'react-bootstrap/Button';
+import './Search.css';
 
 class Search extends Component {
 
@@ -37,16 +38,16 @@ class Search extends Component {
     renderHistory() {
         let historyElements = [];
         for (const [index, value] of this.state.history.entries()) {
-            let itemClass = index % 2 == 0 ? 'search-entry' : 'result-entry';
+            let itemClass = index % 2 === 0 ? 'search-entry' : 'result-entry';
             historyElements.push(
-                <p key={index} class={itemClass}>
+                <p key={index} className={itemClass}>
                     { value }
                 </p>
             );
         }
 
         return (
-            <div class="history">
+            <div className="history">
                 {historyElements}
             </div>
         )
@@ -54,19 +55,19 @@ class Search extends Component {
     
     render() {
         return (
-            <form onSubmit = {this.handleSubmit}>
-                <div>
-                    <input style={{ width: '60%', marginTop: 25}}
-                        type = 'text' 
-                        placeholder = "Search for your favorite crypto..."
-                        value = {this.state.usersearch}
-                        onChange = {this.handleSearchChange}
-                    />
-                    <button type="reset" onClick = {this.clearSearch}>x</button>
-                </div>
-                <Button style={{marginTop: 10}} type="submit" size="lg"> Search </Button>
+            <div className="container">
+                <form onSubmit = {this.handleSubmit} id="search-form">
+                        <input id="search-input"
+                            type = 'text' 
+                            placeholder = "Search for your favorite crypto..."
+                            value = {this.state.usersearch}
+                            onChange = {this.handleSearchChange}
+                        />
+                        <button type="reset" onClick = {this.clearSearch}>x</button>
+                    <Button style={{marginTop: 10}} type="submit" size="lg"> Search </Button>
+                </form>
                 {this.renderHistory()}
-            </form>
+            </div>
         )
     }
 }
