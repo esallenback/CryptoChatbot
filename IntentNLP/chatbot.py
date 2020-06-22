@@ -5,6 +5,8 @@ import model
 import sys
 import random
 
+ERROR_THRESHOLD = 0.7
+
 def main():
     print("Loading model...")
     try:
@@ -23,10 +25,15 @@ def main():
         # x = bag_of_words(user_input)
         x = model.bag_of_words(user_input)
         print(x)
-        results = trained_model.predict([[x]])
+        results = trained_model.predict([[x]])[0]
         print(results)
 
         results_index = np.argmax(results)
+        
+        if results[results_index] < ERROR_THRESHOLD:
+            print("Sorry I didn't understand that, try again")
+            continue
+
         tag = model.labels[results_index]
 
         for tg in model.json_data["intents"]:
