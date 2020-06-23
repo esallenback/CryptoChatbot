@@ -1,0 +1,13 @@
+{"intents": [
+        {"tag": "price",
+            "patterns": ["What is the price of ", "price of ", " value"],
+            "responses": ["Fetching price info"],
+            "context": [""]
+        },
+        {"tag": "news",
+            "patterns": ["whats up with ", "tell me news about ", "what's going on with "],
+            "responses": ["Fetching news info"],
+            "context": [""]
+        }
+    ]
+}
