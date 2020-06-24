@@ -1,12 +1,22 @@
 {"intents": [
-        {"tag": "price",
-            "patterns": ["What is the price of ", "price of ", " value"],
+        {"tag": "generic_price",
+            "patterns": ["What is the price of ", "price of ", " value", "how much does cost"],
             "responses": ["Fetching price info"],
             "context": [""]
         },
-        {"tag": "news",
+        {"tag": "generic_news",
             "patterns": ["whats up with ", "tell me news about ", "what's going on with "],
             "responses": ["Fetching news info"],
+            "context": [""]
+        },
+        {"tag": "crypto_info",
+            "patterns": ["what is crypto", "tell me more about cryptocurrency", "what is cryptocurrency"],
+            "responses": ["Fetching cryptocurrency info"],
+            "context": [""]
+        },
+        {"tag": "generic_background_info",
+            "patterns": ["what is ", "tell me more about ", "what is the history behind "],
+            "responses": ["Fetching background info"],
             "context": [""]
         }
     ]
