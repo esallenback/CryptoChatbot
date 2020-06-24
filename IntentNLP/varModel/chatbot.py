@@ -31,16 +31,20 @@ def main(modelName = "model.h5"):
         if user_input == "exit":
             break
         # x = bag_of_words(user_input)
+        print("")
         x = model.bag_of_words(user_input)
         print(x)
         results = trained_model.predict([[x]])[0]
-        print(results)
+        # print(results)
 
         results_index = np.argmax(results)
         
         if results[results_index] < ERROR_THRESHOLD:
             print("Sorry I didn't understand that, try again")
             continue
+
+        for i in range(len(results)):
+            print(str(results[i]) + " -> " + str(model.labels[i]))
 
         tag = model.labels[results_index]
 
@@ -57,7 +61,8 @@ def main(modelName = "model.h5"):
                 break
         if found == False:
             print("Error: Could not find currency type in query!")
-        print(random.choice(responses))
+        print("")
+        print("Chatbot: " + str(random.choice(responses)))
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
