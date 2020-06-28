@@ -6,7 +6,8 @@ import sys
 import random
 import os
 
-ERROR_THRESHOLD = 0.92
+# can be tuned for more "natural" results
+ERROR_THRESHOLD = 0.8
 
 def main(modelName = "model.h5"):
     print("Loading crypto names...")
@@ -39,12 +40,12 @@ def main(modelName = "model.h5"):
 
         results_index = np.argmax(results)
         
+        for i in range(len(results)):
+            print(str(results[i]) + " -> " + str(model.labels[i]))
+        
         if results[results_index] < ERROR_THRESHOLD:
             print("Sorry I didn't understand that, try again")
             continue
-
-        for i in range(len(results)):
-            print(str(results[i]) + " -> " + str(model.labels[i]))
 
         tag = model.labels[results_index]
 
