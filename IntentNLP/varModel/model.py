@@ -71,12 +71,13 @@ if __name__ == "__main__":
     model.add(Dropout(0.5))
     model.add(Dense(64, activation='relu'))
     model.add(Dropout(0.5))
+    model.add(Dense(32, activation='relu'))
     model.add(Dense(len(output[0]), activation='softmax'))
 
     sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(loss='binary_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
-    model.fit(np.array(training), np.array(output), epochs=200, batch_size=5, verbose=1)
+    model.fit(np.array(training), np.array(output), epochs=300, batch_size=5, verbose=1)
     model.save("model.h5")
 
 def bag_of_words(input):
