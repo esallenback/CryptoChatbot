@@ -55,11 +55,12 @@ def main(modelName = "model.h5"):
                 break
         # Now we have the action intent of the query
         found = False
-        for currency in currency_list:
-            if (currency in user_input.split()):
-                print("Query currency = " + currency)
-                found = True
-                break
+        for currencyLine in currency_list:
+            for currency in currencyLine.split(","):
+                if (currency in user_input.split()):
+                    print("Query currency = " + currencyLine.split(",")[0])
+                    found = True
+                    break
         if found == False:
             print("Error: Could not find currency type in query!")
         print("")
