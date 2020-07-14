@@ -1,13 +1,12 @@
 from datetime import datetime, time, timedelta, timezone
 import math
 import requests
-import time    
 from pymongo import MongoClient
 import os
 from config import Config
 
 class CurrencyData():
-    def __init__(self, currency, time=datetime.combine(datetime.utcnow().date(), time.min()).replace(tzinfo=timezone.utc)):
+    def __init__(self, currency, time=datetime.combine(datetime.utcnow().date(), time.min).replace(tzinfo=timezone.utc)):
         self.currency = currency
 
         # Get yesterday's data
@@ -15,7 +14,7 @@ class CurrencyData():
         #self.timestamp = self.timestamp.replace(hour=0, minute=0, second=0, microsecond=0)
 
         # Defaults to midnight of today (in the morning)
-        self.timestamp = math.floor(time)
+        self.timestamp = time
         
         self.market_cap = None      # nomics
 
@@ -186,7 +185,8 @@ def on_trigger(event, context):
             "close": currency_data.close
         }
         mycol = db[currency]
-        x = mycol.insert_one(myDict)
+        #x = mycol.insert_one(myDict)
+        print(myDict)
 
 if __name__ == "__main__":
     on_trigger(None, None)
