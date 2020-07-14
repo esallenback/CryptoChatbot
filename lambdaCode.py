@@ -1,4 +1,5 @@
-import datetime
+from datetime import datetime, time, timedelta, timezone
+import math
 import requests
 import time    
 from pymongo import MongoClient
@@ -6,12 +7,15 @@ import os
 from config import Config
 
 class CurrencyData():
-    def __init__(self, currency):
+    def __init__(self, currency, time=datetime.combine(datetime.utcnow().date(), time.min()).replace(tzinfo=timezone.utc)):
         self.currency = currency
 
         # Get yesterday's data
-        self.timestamp = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=1)
-        self.timestamp = self.timestamp.replace(hour=0, minute=0, second=0, microsecond=0)
+        #self.timestamp = datetime.now(timezone.utc) - timedelta(days=1)
+        #self.timestamp = self.timestamp.replace(hour=0, minute=0, second=0, microsecond=0)
+
+        # Defaults to midnight of today (in the morning)
+        self.timestamp = math.floor(time)
         
         self.market_cap = None      # nomics
 
@@ -49,8 +53,8 @@ class CurrencyData():
                 return
 
             #The timestamp is for yesterday (Some of the cryptos are not yet updated - easier to pull data for day before)
-            timeStamp = datetime.datetime.strftime(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(1), '%Y-%m-%d')
-            data = data["Time Series (Digital Currency Daily)"][f"{datetime.datetime.strftime(datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(1), '%Y-%m-%d')}"]
+            timeStamp = datetime.strftime(datetime.now(timezone.utc) - timedelta(1), '%Y-%m-%d')
+            data = data["Time Series (Digital Currency Daily)"][f"{datetime.strftime(datetime.now(timezone.utc) - timedelta(1), '%Y-%m-%d')}"]
 
             self.open = float(data["1a. open (USD)"])
             self.close = float(data["4a. close (USD)"])
@@ -120,7 +124,7 @@ class CurrencyData():
             headers = {"Apikey": Config.API_KEYS["CRYPTOCOMPARE"]}
 
             url = "https://min-api.cryptocompare.com/data/v2/histoday"
-            parameters = {"fsym": self.currency, "tsym": "USD", "limit": 1}
+            parameters = {"fsym": self.currency, "tsym": "USD", "limit": 1, "toTS": self.timestamp.timestamp()}
             response = requests.request("GET", url, params=parameters, headers=headers)
 
             data = response.json()["Data"]["Data"][0]
