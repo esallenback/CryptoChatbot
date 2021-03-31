@@ -2,3 +2,4 @@
 2. move tutorial/one off code into seprate folder; seprate from main CryptoCurrent product
 3. Remove binaries from github (already added to .gitignore)
 4. THESE API KEYS SHOULD NOT BE PUSHED TO A PUBLIC GIT REPOSITORY.
+
