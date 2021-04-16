@@ -1,53 +1,34 @@
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
-def tsvToList(filename):
-    conversationList = []
+
+
+#TSV formatted with a column header,
+#ID\tQuestion\tAnswer
+def trainFromTSV(chatbot, filename):
+
     #file should include a header row
+    trainer = ListTrainer(chatbot, show_training_progress=False)
     
     datafile = open(filename, 'r')
     line = datafile.readline()
     isEnd = False
+    linesTrained = 0
     while not isEnd:
         line = datafile.readline()
+        if linesTrained%1000 == 0:
+            print(linesTrained, "lines trained so far")
         if not line:
             isEnd = True
         else:
             linelist = line.split('\t')
+            #remove ID field
+            linelist.pop(0)
+            linelist[1] = linelist[1].strip()
             #add question, add answer
-            conversationList.append(linelist[1])
-            conversationList.append(linelist[2])
-    
-    return conversationList
-
-def tsvTo2DList(filename):
-        conversationList = []
-        #file should include a header row
-        
-        datafile = open(filename, 'r')
-        line = datafile.readline()
-        isEnd = False
-        while not isEnd:
-            line = datafile.readline()
-            if not line:
-                isEnd = True
-            else:
-                linelist = line.split('\t')
-                #remove ID field
-                linelist.pop(0)
-                linelist[1] = linelist[1].strip()
-                #add question, add answer
-                conversationList.append(linelist)
-        
-        return conversationList
-
-def trainChatbot(chatbot, filename):
-
-    trainingList = tsvToList(filename)
-    print("List size: ", len(trainingList))
-
-    trainer = ListTrainer(chatbot)
-
-    trainer.train(trainingList)
+            trainer.train(linelist)
+            linesTrained += 1
+    return linesTrained
+                
 
 def main():
     chatbot = ChatBot(
@@ -58,12 +39,11 @@ def main():
     )
 
     datafile = "chatbot-development12.tsv"
-    trainingList = tsvTo2DList(datafile)
 
     ans = input("Train? (y/n): ")
     if ans.lower()=='y':
         print("using datafile", datafile)
-        trainChatbot(chatbot, datafile)
+        print("Lines trained", trainFromTSV(chatbot, datafile))
     elif ans.lower() != 'n':
         print("y/n only please")
         return 1
