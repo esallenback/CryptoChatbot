@@ -1,0 +1,6 @@
+questions that work:
+What is the price of btc
+What is the price of eth
+
+questions that don't:
+What is the price of bitcoin
