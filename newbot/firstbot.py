@@ -80,8 +80,14 @@ def main():
             else:
                 bot_input = chatbot.get_response(userResponse)
                 print(bot_input)
+                if(bot_input=="No value for search_text was available on the provided input"):
+                    raise ValueError("No message given")
         except(KeyboardInterrupt, EOFError, SystemExit):
             notDone = False
             print("oh, bye then!")
-
+        except(ValueError):
+            print("Hello? Anyone there?")
+        except:
+            print("uh oh! exception thrown")
+            notDone = True
 main()

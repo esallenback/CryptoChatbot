@@ -14,7 +14,7 @@ def homepage():
         return render_template('webpage.html') + '<br><br>' + 'Real time data taken from coinbase.com'
     
 def priceOf(cryptoName, cryptoType):
-    return ("Current price of " + cryptoName + ": " +
+    return ("Current price of " + cryptoName + ": $" +
             str(float(requests.get("https://api.coinbase.com/v2/prices/" + cryptoType + "-USD/buy").json()["data"]["amount"])))
 
 def cryptoIntro():
