@@ -1,5 +1,6 @@
 from chatterbot import ChatBot
-from chatterbot.trainers import ListTrainer
+from chatterbot.trainers import ListTrainer, ChatterBotCorpusTrainer
+
 
 
 #TSV formatted with a column header,
@@ -29,45 +30,45 @@ def trainFromTSV(chatbot, filename):
             linesTrained += 1
     return linesTrained
                 
+def trainEnglishGreetings(chatbot):
+    trainer = ChatterBotCorpusTrainer(chatbot)
+    trainer.train("chatterbot.corpus.english.greetings")
 
-def main():
+
+def initializeBot(doTrain, datafile):
     chatbot = ChatBot(
         "CryptoCurrent",
         storage_adapter='chatterbot.storage.SQLStorageAdapter',
+        logic_adapters=[
+            {
+                'import_path': 'botadapter.PriceAdapter'
+            },
+            {
+                'import_path': 'chatterbot.logic.BestMatch',
+                'default_response': 'I\'m not sure how to answer that',
+                'maximum_similarity_threshold': 0.95
+            }
+            
+        ],
         database_uri='sqlite:///database.sqlite3',
         read_only=True
     )
 
-    datafile = "chatbot-development12.tsv"
-
-    ans = input("Train? (y/n): ")
-    if ans.lower()=='y':
+    if doTrain:
         print("using datafile", datafile)
+        trainEnglishGreetings(chatbot)
         print("Lines trained", trainFromTSV(chatbot, datafile))
-    elif ans.lower() != 'n':
-        print("y/n only please")
-        return 1
     
-    
-    notDone = True
-    print("Talk to me, or 'exit' to stop")
-    while notDone:
-        try:
-            userResponse = input(">>")
-            if userResponse == "exit":
-                notDone = False
-                print("goodbye!")
-            else:
-                bot_input = chatbot.get_response(userResponse)
-                print(bot_input)
-                if(bot_input=="No value for search_text was available on the provided input"):
-                    raise ValueError("No message given")
-        except(KeyboardInterrupt, EOFError, SystemExit):
-            notDone = False
-            print("oh, bye then!")
-        except(ValueError):
-            print("Hello? Anyone there?")
-        except:
-            print("uh oh! exception thrown")
-            notDone = True
-main()
+    return chatbot
+
+def getResponse(chatbot, input):
+    try:
+        bot_input = chatbot.get_response(input)
+        return bot_input
+    except(ValueError):
+        return "Please enter a response"
+    except Exception as e:
+        print(e)
+        return ("Encountered exception: \n\t" + str(e))
+    return "Please enter a response"
+
