@@ -1,3 +1,4 @@
+#Binaries and environment files / variables should go in here
 venv
 __pycache__
 *.sqlite3*
