@@ -1,0 +1,3 @@
+bitcoin,btc
+ripple
+ethereum

@@ -1,1 +1,2 @@
-This folder contains the Python dictionary method code that runs as a AWS Lambda function. The react code calls this code like an API.
+This folder contains the Python dictionary method code that runs as a AWS Lambda 
+function. The react code calls this code like an API.

@@ -5,6 +5,8 @@ ChatterBot==1.0.5
 chatterbot-corpus==1.2.0
 cymem==2.0.3
 future==0.18.2
+flask
+flask-sqlalchemy
 idna==2.8
 mathparse==0.1.2
 murmurhash==1.0.2
@@ -26,3 +28,4 @@ thinc==7.0.8
 tqdm==4.39.0
 urllib3==1.25.7
 wasabi==0.4.0
+selenium

@@ -1,3 +1,0 @@
-bitcoin,btc
-ripple
-ethereum
