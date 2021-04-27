@@ -1,5 +1,6 @@
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer, ChatterBotCorpusTrainer
+from chatterbot.conversation import Statement
 
 
 
@@ -61,14 +62,16 @@ def initializeBot(doTrain, datafile):
     
     return chatbot
 
-def getResponse(chatbot, input):
+def getResponse(chatbot, usrInput):
+
     try:
-        bot_input = chatbot.get_response(input)
+        bot_input = chatbot.get_response(usrInput)
         return bot_input
     except(ValueError):
-        return "Please enter a response"
-    except Exception as e:
-        print(e)
-        return ("Encountered exception: \n\t" + str(e))
+        err = Statment(text='Please enter a response')
+        return err
+#    except Exception as e:
+#        print(e)
+#        return ("Encountered exception: \n\t" + str(e))
     return "Please enter a response"
 

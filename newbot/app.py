@@ -9,12 +9,16 @@ theBot = initializeBot(False, "chatbot-development12.tsv")
 def home():
     if request.method=="POST":
         userIn = request.form["response"]
-        flash("Cryptocurrent: " + getResponse(theBot, userIn).text)
-
+        botres = getResponse(theBot, userIn)
+#        try:
+#            flash("Cryptocurrent: " + botres.text)
+#        except(AttributeError):
+#            flash("Cryptocurrent: " + botres)
+        flash("Cryptocurrent: " + botres.text)
         return render_template("index.html")
     else:
         return render_template("index.html")
 
 if __name__ == "__main__":
     
-    app.run()
+    app.run(debug=False)
