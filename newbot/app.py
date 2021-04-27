@@ -10,10 +10,7 @@ def home():
     if request.method=="POST":
         userIn = request.form["response"]
         botres = getResponse(theBot, userIn)
-#        try:
-#            flash("Cryptocurrent: " + botres.text)
-#        except(AttributeError):
-#            flash("Cryptocurrent: " + botres)
+
         flash("Cryptocurrent: " + botres.text)
         return render_template("index.html")
     else:
