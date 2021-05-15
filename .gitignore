@@ -9,3 +9,4 @@ ven
 node_modules
 *.pickle
 APIkeys.txt
+*.tsv
