@@ -8,3 +8,5 @@ ven
 .vscode
 node_modules
 *.pickle
+APIkeys.txt
+*.tsv

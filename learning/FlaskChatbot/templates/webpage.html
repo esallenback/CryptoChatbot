@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+	<link href="https://fonts.googleapis.com/css?family=Crimson+Text|Work+Sans:400,700" type="text/css" rel="stylesheet">
+</head>
+<body>
+
+<h2>Cryptocurrency Chatbot</h2>
+{{user_input}}
+<form action="." method="POST">
+	<div>
+	Ask a question:<br>
+	<input type="text" name="user_input">
+	<input type="submit"> 
+	<br>
+</form>
+</div>
+
+</body>
+</html>

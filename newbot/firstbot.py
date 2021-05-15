@@ -62,16 +62,19 @@ def initializeBot(doTrain, datafile):
     
     return chatbot
 
+def trainMsg(chatbot, msg1, msg2):
+    trainer = ListTrainer(chatbot, show_training_progress=False)
+    trainer.train([msg1, msg2])
+
 def getResponse(chatbot, usrInput):
 
     try:
         bot_input = chatbot.get_response(usrInput)
         return bot_input
     except(ValueError):
-        err = Statment(text='Please enter a response')
+        err = Statement(text='Please enter a response')
         return err
 #    except Exception as e:
 #        print(e)
 #        return ("Encountered exception: \n\t" + str(e))
-    return "Please enter a response"
 

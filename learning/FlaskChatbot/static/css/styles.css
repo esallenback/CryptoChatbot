@@ -1,0 +1,16 @@
+body {
+	background-color: #DEF0FF;
+	text-align: center;
+	padding-top: 150px;
+	font-family: 'Crimson Text';
+	color: #0F4C7F;
+}
+h1 {
+	color: #0F4C7F;
+	font-variant: small-caps;
+	font-weight: bold;
+}
+h2 {
+	color: #0F4C7F;
+	font-weight: light;
+}

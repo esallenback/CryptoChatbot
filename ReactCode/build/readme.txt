@@ -1,1 +1,0 @@
-This folder contains all of the react frontend code. Only the build folder needs to be uploaded to s3. The frontend code calls the Lambda function when the user asks a question. The Lambda function then returns the response for the frontend to display.
