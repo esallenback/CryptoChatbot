@@ -14,7 +14,7 @@ MarkupSafe==1.1.1
 mathparse==0.1.2
 murmurhash==1.0.5
 nltk==3.6.1
-numpy==1.20.2
+numpy==1.22.0
 packaging==20.9
 pandas==1.2.4
 Pint==0.17
