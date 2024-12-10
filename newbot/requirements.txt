@@ -24,7 +24,7 @@ pymongo==3.11.3
 pyparsing==2.4.7
 python-dateutil==2.7.5
 pytz==2021.1
-PyYAML==3.13
+PyYAML==5.4
 regex==2021.4.4
 requests==2.25.1
 selenium==3.141.0
